@@ -1,0 +1,12 @@
+# Force all text files to have CRLF line endings in the working tree
+# and normalize to LF in the git index (standard behavior)
+* text=auto eol=crlf
+
+# Explicitly ensure common web files use CRLF
+*.ts text eol=crlf
+*.tsx text eol=crlf
+*.js text eol=crlf
+*.css text eol=crlf
+*.json text eol=crlf
+*.md text eol=crlf
+*.mjs text eol=crlf
