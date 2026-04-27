@@ -65,6 +65,9 @@ My Link is a link-in-bio service designed for developers and creators to consoli
 - **Real-time Sync**: Ensure dashboard and public pages reflect changes instantly using Firestore real-time updates.
 - **Type Safety**: Strictly adhere to TypeScript interfaces for all data models.
 
+### Git Conventions
+- **Commit Messages**: 커밋 메시지는 상세하게 한국어로 작성합니다. (e.g., `feat: 구글 로그인 기능 구현`)
+
 ---
 
 ## 5. Validation Process
