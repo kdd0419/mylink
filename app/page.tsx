@@ -1,11 +1,15 @@
 "use client";
 
-import { DUMMY_LINKS } from "@/data/links";
+import { useState } from "react";
+import { DUMMY_LINKS, type Link } from "@/data/links";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Share2, Globe, Terminal, Code2, User } from "lucide-react";
+import { ExternalLink, Share2, Globe, Code2, User, Trash2 } from "lucide-react";
+import { LinkAddDialog } from "@/components/shared/link-add-dialog";
 
 export default function Page() {
+  const [links, setLinks] = useState<Link[]>(DUMMY_LINKS);
+
   const getFaviconUrl = (url: string) => {
     try {
       const domain = new URL(url).hostname;
@@ -13,6 +17,20 @@ export default function Page() {
     } catch {
       return null;
     }
+  };
+
+  const handleAddLink = (title: string, url: string) => {
+    const newLink: Link = {
+      id: Math.random().toString(36).substring(2, 9),
+      title,
+      url,
+      createdAt: new Date(),
+    };
+    setLinks((prev) => [newLink, ...prev]);
+  };
+
+  const handleDeleteLink = (id: string) => {
+    setLinks((prev) => prev.filter((link) => link.id !== id));
   };
 
   return (
@@ -27,7 +45,6 @@ export default function Page() {
           <div className="relative group">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-chart-2 to-primary opacity-70 blur transition duration-500 group-hover:opacity-100 group-hover:duration-200 animate-pulse"></div>
             <div className="relative w-28 h-28 rounded-full bg-card border-2 border-background overflow-hidden flex items-center justify-center">
-              {/* Default Avatar Icon */}
               <div className="bg-muted w-full h-full flex items-center justify-center">
                 <User className="w-12 h-12 text-muted-foreground" />
               </div>
@@ -58,48 +75,70 @@ export default function Page() {
           </div>
         </header>
 
+        {/* Action Section */}
+        <div className="w-full mb-8">
+          <LinkAddDialog onAdd={handleAddLink} />
+        </div>
+
         {/* Links Section */}
         <main className="w-full flex flex-col gap-3.5">
-          {DUMMY_LINKS.map((link) => (
-            <a
-              key={link.id}
-              href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group relative block w-full outline-none"
-            >
-              <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] py-0">
-                <div className="flex items-center p-4 gap-4">
-                  {/* Favicon Icon */}
-                  <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
-                    <img
-                      src={getFaviconUrl(link.url) || ""}
-                      alt={link.title}
-                      className="h-6 w-6 object-contain z-10"
-                      onError={(e) => {
-                        e.currentTarget.style.display = 'none';
-                        e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                    <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
-                      <Code2 className="h-5 w-5 text-muted-foreground/60" />
+          {links.map((link) => (
+            <div key={link.id} className="group relative flex items-center gap-2">
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 outline-none"
+              >
+                <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] py-0">
+                  <div className="flex items-center p-4 gap-4">
+                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
+                      <img
+                        src={getFaviconUrl(link.url) || ""}
+                        alt={link.title}
+                        className="h-6 w-6 object-contain z-10"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                      <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
+                        <Code2 className="h-5 w-5 text-muted-foreground/60" />
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex-1 min-w-0 text-left">
-                    <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
-                      {link.title}
-                    </h2>
-                    <p className="text-[11px] text-muted-foreground truncate opacity-70">
-                      {new URL(link.url).hostname}
-                    </p>
-                  </div>
+                    
+                    <div className="flex-1 min-w-0 text-left">
+                      <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+                        {link.title}
+                      </h2>
+                      <p className="text-[11px] text-muted-foreground truncate opacity-70">
+                        {new URL(link.url).hostname}
+                      </p>
+                    </div>
 
-                  <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                </div>
-              </Card>
-            </a>
+                    <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                  </div>
+                </Card>
+              </a>
+              
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => handleDeleteLink(link.id)}
+                className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
+                title="링크 삭제"
+              >
+                <Trash2 className="w-4.5 h-4.5" />
+              </Button>
+            </div>
           ))}
+
+          {links.length === 0 && (
+            <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-3xl bg-muted/5">
+              <p className="text-sm text-muted-foreground font-medium">아직 추가된 링크가 없습니다.</p>
+              <p className="text-[11px] text-muted-foreground/60 mt-1">새 링크 추가 버튼을 눌러보세요!</p>
+            </div>
+          )}
         </main>
 
         <footer className="mt-16 flex flex-col items-center gap-4 text-center">
