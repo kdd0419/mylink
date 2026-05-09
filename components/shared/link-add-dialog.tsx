@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,35 +16,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// Define form schema with Zod
-const linkFormSchema = z.object({
-  title: z
-    .string()
-    .min(1, { message: "제목을 입력해주세요." })
-    .max(50, { message: "제목은 50자 이내로 입력해주세요." }),
-  url: z
-    .string()
-    .min(1, { message: "URL을 입력해주세요." })
-    .transform((val) => {
-      if (!val.includes("://") && val.trim().length > 0) {
-        return `https://${val.trim()}`;
-      }
-      return val.trim();
-    })
-    .pipe(
-      z.string().url({ message: "올바른 URL 형식을 입력해주세요 (예: google.com)." })
-    ),
-});
-
-type LinkFormValues = z.infer<typeof linkFormSchema>;
+import { linkFormSchema, LinkFormValues, formatUrl } from "@/lib/validations";
+import { Loader2 } from "lucide-react";
 
 interface LinkAddDialogProps {
-  onAdd: (title: string, url: string) => void;
+  onAdd: (title: string, url: string) => Promise<void>;
 }
 
 export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
   const [open, setOpen] = useState(false);
+  const [isAdding, setIsAdding] = useState(false);
 
   // Initialize React Hook Form
   const {
@@ -64,18 +44,22 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
 
   const titleValue = watch("title") || "";
 
-  const onSubmit = (values: LinkFormValues) => {
-    let formattedUrl = values.url.trim();
-    if (!/^https?:\/\//i.test(formattedUrl)) {
-      formattedUrl = `https://${formattedUrl}`;
+  const onSubmit = async (values: LinkFormValues) => {
+    try {
+      setIsAdding(true);
+      const formattedUrl = formatUrl(values.url);
+      await onAdd(values.title.trim(), formattedUrl);
+      reset();
+      setOpen(false);
+    } catch (error) {
+      console.error("Add failed:", error);
+    } finally {
+      setIsAdding(false);
     }
-
-    onAdd(values.title.trim(), formattedUrl);
-    reset();
-    setOpen(false);
   };
 
   const handleOpenChange = (val: boolean) => {
+    if (isAdding) return;
     setOpen(val);
     if (!val) {
       reset();
@@ -115,6 +99,7 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
                 placeholder="예: 내 기술 블로그"
                 className={`h-11 rounded-xl ${errors.title ? "border-destructive ring-destructive/20" : ""}`}
                 {...register("title")}
+                disabled={isAdding}
               />
               {errors.title && (
                 <p className="text-[11px] text-destructive font-medium ml-1">
@@ -131,6 +116,7 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
                 placeholder="예: velog.io/@username"
                 className={`h-11 rounded-xl ${errors.url ? "border-destructive ring-destructive/20" : ""}`}
                 {...register("url")}
+                disabled={isAdding}
               />
               {errors.url && (
                 <p className="text-[11px] text-destructive font-medium ml-1">
@@ -140,8 +126,12 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
             </div>
           </div>
           <DialogFooter>
-            <Button type="submit" className="w-full h-11 rounded-xl font-semibold">
-              추가하기
+            <Button type="submit" className="w-full h-11 rounded-xl font-semibold" disabled={isAdding}>
+              {isAdding ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                "추가하기"
+              )}
             </Button>
           </DialogFooter>
         </form>

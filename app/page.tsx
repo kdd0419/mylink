@@ -1,31 +1,28 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Share2, Globe, Code2, User, Trash2 } from "lucide-react";
+import { Share2, User } from "lucide-react";
 import { LinkAddDialog } from "@/components/shared/link-add-dialog";
+import { LinkItem } from "@/components/shared/link-item";
+import { LinkDeleteDialog } from "@/components/shared/link-delete-dialog";
 import { useLinks } from "@/hooks/useLinks";
+import { Link } from "@/data/links";
 
 export default function Page() {
-  const { links, isLoading, addLink, deleteLink } = useLinks();
-
-  const getFaviconUrl = (url: string) => {
-    try {
-      const domain = new URL(url).hostname;
-      return `https://www.google.com/s2/favicons?domain=${domain}&sz=64`;
-    } catch {
-      return null;
-    }
-  };
+  const { links, isLoading, addLink, deleteLink, updateLink } = useLinks();
+  const [linkToDelete, setLinkToDelete] = useState<Link | null>(null);
 
   const handleAddLink = async (title: string, url: string) => {
     await addLink(title, url);
   };
 
+  const handleUpdateLink = async (id: string, title: string, url: string) => {
+    await updateLink(id, title, url);
+  };
+
   const handleDeleteLink = async (id: string) => {
-    if (confirm("이 링크를 삭제하시겠습니까?")) {
-      await deleteLink(id);
-    }
+    await deleteLink(id);
   };
 
   return (
@@ -49,9 +46,6 @@ export default function Page() {
           <div className="space-y-1.5">
             <h1 className="text-3xl font-extrabold tracking-tight flex items-center justify-center gap-2">
               @dev_kim
-              <div className="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-mono border border-primary/20 uppercase tracking-widest">
-                Developer
-              </div>
             </h1>
             <p className="text-muted-foreground text-sm max-w-[320px] leading-relaxed">
               Frontend Engineer passionate about building beautiful, functional user experiences. ✨
@@ -62,10 +56,6 @@ export default function Page() {
             <Button variant="outline" size="sm" className="rounded-full h-8 gap-1.5 text-xs bg-background/50 backdrop-blur-sm">
               <Share2 className="w-3.5 h-3.5" />
               공유하기
-            </Button>
-            <Button variant="outline" size="sm" className="rounded-full h-8 gap-1.5 text-xs bg-background/50 backdrop-blur-sm">
-              <Globe className="w-3.5 h-3.5" />
-              GitHub
             </Button>
           </div>
         </header>
@@ -85,56 +75,12 @@ export default function Page() {
           ) : (
             <>
               {links.map((link) => (
-                <div key={link.id} className="group relative flex items-center w-full">
-                  <a
-                    href={link.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 outline-none"
-                  >
-                    <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] py-0">
-                      <div className="flex items-center p-4 gap-4">
-                        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
-                          <img
-                            src={getFaviconUrl(link.url) || ""}
-                            alt={link.title}
-                            className="h-6 w-6 object-contain z-10"
-                            onError={(e) => {
-                              e.currentTarget.style.display = 'none';
-                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                            }}
-                          />
-                          <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
-                            <Code2 className="h-5 w-5 text-muted-foreground/60" />
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 min-w-0 text-left">
-                          <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
-                            {link.title}
-                          </h2>
-                          <p className="text-[11px] text-muted-foreground truncate opacity-70">
-                            {new URL(link.url).hostname}
-                          </p>
-                        </div>
-
-                        <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
-                      </div>
-                    </Card>
-                  </a>
-                  
-                  <div className="overflow-hidden transition-all duration-300 w-0 group-hover:w-10 ml-0 group-hover:ml-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleDeleteLink(link.id)}
-                      className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
-                      title="링크 삭제"
-                    >
-                      <Trash2 className="w-4.5 h-4.5" />
-                    </Button>
-                  </div>
-                </div>
+                <LinkItem
+                  key={link.id}
+                  link={link}
+                  onUpdate={handleUpdateLink}
+                  onDeleteRequest={(l) => setLinkToDelete(l)}
+                />
               ))}
 
               {links.length === 0 && (
@@ -160,6 +106,14 @@ export default function Page() {
           </p>
         </footer>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      <LinkDeleteDialog
+        link={linkToDelete}
+        isOpen={!!linkToDelete}
+        onClose={() => setLinkToDelete(null)}
+        onConfirm={handleDeleteLink}
+      />
     </div>
   );
 }

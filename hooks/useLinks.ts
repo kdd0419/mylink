@@ -19,9 +19,9 @@ export function useLinks() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const fetchLinks = useCallback(async () => {
+  const fetchLinks = useCallback(async (withLoading = true) => {
     try {
-      setIsLoading(true);
+      if (withLoading) setIsLoading(true);
       const linksCollectionRef = collection(db, "users", "anonymous", "links");
       const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
       
@@ -39,12 +39,15 @@ export function useLinks() {
       console.error("Firestore fetching error:", err);
       setError(err as Error);
     } finally {
-      setIsLoading(false);
+      if (withLoading) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    fetchLinks();
+    const init = async () => {
+      await fetchLinks();
+    };
+    init();
   }, [fetchLinks]);
 
   const addLink = async (title: string, url: string) => {
@@ -75,12 +78,29 @@ export function useLinks() {
     }
   };
 
+  const updateLink = async (id: string, title: string, url: string) => {
+    try {
+      const { updateDoc } = await import("firebase/firestore");
+      const linkDocRef = doc(db, "users", "anonymous", "links", id);
+      await updateDoc(linkDocRef, {
+        title,
+        url,
+      });
+      // 수정 후 목록 갱신
+      await fetchLinks();
+    } catch (err) {
+      console.error("Error updating link:", err);
+      throw err;
+    }
+  };
+
   return {
     links,
     isLoading,
     error,
     addLink,
     deleteLink,
+    updateLink,
     refresh: fetchLinks,
   };
 }
