@@ -12,6 +12,7 @@ export interface Link {
   title: string;
   url: string;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 export const DUMMY_LINKS: Link[] = [

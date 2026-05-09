@@ -29,8 +29,9 @@ export function useLinks() {
       const fetchedLinks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        // Firestore Timestamp를 JS Date로 변환 (서버 타임스탬프 미결정 시 현재 시간 사용)
+        // Firestore Timestamp를 JS Date로 변환
         createdAt: doc.data().createdAt?.toDate() || new Date(),
+        updatedAt: doc.data().updatedAt?.toDate(),
       })) as Link[];
 
       setLinks(fetchedLinks);
@@ -53,10 +54,12 @@ export function useLinks() {
   const addLink = async (title: string, url: string) => {
     try {
       const linksCollectionRef = collection(db, "users", "anonymous", "links");
+      const now = serverTimestamp();
       await addDoc(linksCollectionRef, {
         title,
         url,
-        createdAt: serverTimestamp(),
+        createdAt: now,
+        updatedAt: now,
       });
       // 추가 후 목록 갱신
       await fetchLinks();
@@ -85,6 +88,7 @@ export function useLinks() {
       await updateDoc(linkDocRef, {
         title,
         url,
+        updatedAt: serverTimestamp(),
       });
       // 수정 후 목록 갱신
       await fetchLinks();
