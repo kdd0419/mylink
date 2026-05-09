@@ -1,49 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { type Link } from "@/data/links";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Share2, Globe, Code2, User, Trash2 } from "lucide-react";
 import { LinkAddDialog } from "@/components/shared/link-add-dialog";
-import { db } from "@/lib/firebase";
-import { 
-  collection, 
-  onSnapshot, 
-  addDoc, 
-  deleteDoc, 
-  doc, 
-  query, 
-  orderBy,
-  serverTimestamp 
-} from "firebase/firestore";
+import { useLinks } from "@/hooks/useLinks";
 
 export default function Page() {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Real-time listener for Firestore
-  useEffect(() => {
-    const linksCollectionRef = collection(db, "users", "anonymous", "links");
-    const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const fetchedLinks = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-        // Convert Firestore Timestamp to JS Date if it exists
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-      })) as Link[];
-      
-      setLinks(fetchedLinks);
-      setIsLoading(false);
-    }, (error) => {
-      console.error("Error fetching links:", error);
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const { links, isLoading, addLink, deleteLink } = useLinks();
 
   const getFaviconUrl = (url: string) => {
     try {
@@ -55,24 +19,12 @@ export default function Page() {
   };
 
   const handleAddLink = async (title: string, url: string) => {
-    try {
-      const linksCollectionRef = collection(db, "users", "anonymous", "links");
-      await addDoc(linksCollectionRef, {
-        title,
-        url,
-        createdAt: serverTimestamp(),
-      });
-    } catch (error) {
-      console.error("Error adding link:", error);
-    }
+    await addLink(title, url);
   };
 
   const handleDeleteLink = async (id: string) => {
-    try {
-      const linkDocRef = doc(db, "users", "anonymous", "links", id);
-      await deleteDoc(linkDocRef);
-    } catch (error) {
-      console.error("Error deleting link:", error);
+    if (confirm("이 링크를 삭제하시겠습니까?")) {
+      await deleteLink(id);
     }
   };
 
