@@ -1,14 +1,49 @@
 "use client";
 
-import { useState } from "react";
-import { DUMMY_LINKS, type Link } from "@/data/links";
+import { useState, useEffect } from "react";
+import { type Link } from "@/data/links";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, Share2, Globe, Code2, User, Trash2 } from "lucide-react";
 import { LinkAddDialog } from "@/components/shared/link-add-dialog";
+import { db } from "@/lib/firebase";
+import { 
+  collection, 
+  onSnapshot, 
+  addDoc, 
+  deleteDoc, 
+  doc, 
+  query, 
+  orderBy,
+  serverTimestamp 
+} from "firebase/firestore";
 
 export default function Page() {
-  const [links, setLinks] = useState<Link[]>(DUMMY_LINKS);
+  const [links, setLinks] = useState<Link[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Real-time listener for Firestore
+  useEffect(() => {
+    const linksCollectionRef = collection(db, "users", "anonymous", "links");
+    const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const fetchedLinks = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+        // Convert Firestore Timestamp to JS Date if it exists
+        createdAt: doc.data().createdAt?.toDate() || new Date(),
+      })) as Link[];
+      
+      setLinks(fetchedLinks);
+      setIsLoading(false);
+    }, (error) => {
+      console.error("Error fetching links:", error);
+      setIsLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const getFaviconUrl = (url: string) => {
     try {
@@ -19,18 +54,26 @@ export default function Page() {
     }
   };
 
-  const handleAddLink = (title: string, url: string) => {
-    const newLink: Link = {
-      id: Math.random().toString(36).substring(2, 9),
-      title,
-      url,
-      createdAt: new Date(),
-    };
-    setLinks((prev) => [newLink, ...prev]);
+  const handleAddLink = async (title: string, url: string) => {
+    try {
+      const linksCollectionRef = collection(db, "users", "anonymous", "links");
+      await addDoc(linksCollectionRef, {
+        title,
+        url,
+        createdAt: serverTimestamp(),
+      });
+    } catch (error) {
+      console.error("Error adding link:", error);
+    }
   };
 
-  const handleDeleteLink = (id: string) => {
-    setLinks((prev) => prev.filter((link) => link.id !== id));
+  const handleDeleteLink = async (id: string) => {
+    try {
+      const linkDocRef = doc(db, "users", "anonymous", "links", id);
+      await deleteDoc(linkDocRef);
+    } catch (error) {
+      console.error("Error deleting link:", error);
+    }
   };
 
   return (
@@ -82,62 +125,73 @@ export default function Page() {
 
         {/* Links Section */}
         <main className="w-full flex flex-col gap-3.5">
-          {links.map((link) => (
-            <div key={link.id} className="group relative flex items-center gap-2">
-              <a
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 outline-none"
-              >
-                <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] py-0">
-                  <div className="flex items-center p-4 gap-4">
-                    <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
-                      <img
-                        src={getFaviconUrl(link.url) || ""}
-                        alt={link.title}
-                        className="h-6 w-6 object-contain z-10"
-                        onError={(e) => {
-                          e.currentTarget.style.display = 'none';
-                          e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                      <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
-                        <Code2 className="h-5 w-5 text-muted-foreground/60" />
+          {isLoading ? (
+            <div className="py-12 flex flex-col items-center justify-center">
+              <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+              <p className="text-sm text-muted-foreground animate-pulse">링크를 불러오는 중...</p>
+            </div>
+          ) : (
+            <>
+              {links.map((link) => (
+                <div key={link.id} className="group relative flex items-center w-full">
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 outline-none"
+                  >
+                    <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)] py-0">
+                      <div className="flex items-center p-4 gap-4">
+                        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
+                          <img
+                            src={getFaviconUrl(link.url) || ""}
+                            alt={link.title}
+                            className="h-6 w-6 object-contain z-10"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+                            }}
+                          />
+                          <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
+                            <Code2 className="h-5 w-5 text-muted-foreground/60" />
+                          </div>
+                        </div>
+                        
+                        <div className="flex-1 min-w-0 text-left">
+                          <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
+                            {link.title}
+                          </h2>
+                          <p className="text-[11px] text-muted-foreground truncate opacity-70">
+                            {new URL(link.url).hostname}
+                          </p>
+                        </div>
+
+                        <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
                       </div>
-                    </div>
-                    
-                    <div className="flex-1 min-w-0 text-left">
-                      <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
-                        {link.title}
-                      </h2>
-                      <p className="text-[11px] text-muted-foreground truncate opacity-70">
-                        {new URL(link.url).hostname}
-                      </p>
-                    </div>
-
-                    <ExternalLink className="w-4 h-4 text-muted-foreground/50 group-hover:text-primary/70 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all" />
+                    </Card>
+                  </a>
+                  
+                  <div className="overflow-hidden transition-all duration-300 w-0 group-hover:w-10 ml-0 group-hover:ml-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDeleteLink(link.id)}
+                      className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-colors"
+                      title="링크 삭제"
+                    >
+                      <Trash2 className="w-4.5 h-4.5" />
+                    </Button>
                   </div>
-                </Card>
-              </a>
-              
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => handleDeleteLink(link.id)}
-                className="h-10 w-10 shrink-0 rounded-xl text-muted-foreground/40 hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover:opacity-100 transition-all focus:opacity-100"
-                title="링크 삭제"
-              >
-                <Trash2 className="w-4.5 h-4.5" />
-              </Button>
-            </div>
-          ))}
+                </div>
+              ))}
 
-          {links.length === 0 && (
-            <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-3xl bg-muted/5">
-              <p className="text-sm text-muted-foreground font-medium">아직 추가된 링크가 없습니다.</p>
-              <p className="text-[11px] text-muted-foreground/60 mt-1">새 링크 추가 버튼을 눌러보세요!</p>
-            </div>
+              {links.length === 0 && (
+                <div className="py-12 flex flex-col items-center justify-center border-2 border-dashed border-border/50 rounded-3xl bg-muted/5">
+                  <p className="text-sm text-muted-foreground font-medium">아직 추가된 링크가 없습니다.</p>
+                  <p className="text-[11px] text-muted-foreground/60 mt-1">새 링크 추가 버튼을 눌러보세요!</p>
+                </div>
+              )}
+            </>
           )}
         </main>
 
