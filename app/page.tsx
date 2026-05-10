@@ -7,10 +7,13 @@ import { LinkAddDialog } from "@/components/shared/link-add-dialog";
 import { LinkItem } from "@/components/shared/link-item";
 import { LinkDeleteDialog } from "@/components/shared/link-delete-dialog";
 import { useLinks } from "@/hooks/useLinks";
+import { useAuth } from "@/hooks/useAuth";
+import { Landing } from "@/components/shared/landing";
 import { Link } from "@/data/links";
 
 export default function Page() {
-  const { links, isLoading, addLink, deleteLink, updateLink } = useLinks();
+  const { user, profile, loading: authLoading } = useAuth();
+  const { links, isLoading: linksLoading, addLink, deleteLink, updateLink } = useLinks(user?.uid);
   const [linkToDelete, setLinkToDelete] = useState<Link | null>(null);
 
   const handleAddLink = async (title: string, url: string) => {
@@ -25,8 +28,25 @@ export default function Page() {
     await deleteLink(id);
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-svh flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="relative min-h-svh overflow-hidden bg-background font-sans antialiased text-foreground pt-14">
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
+        <Landing />
+      </div>
+    );
+  }
+
   return (
-    <div className="relative min-h-svh overflow-hidden bg-background font-sans antialiased text-foreground">
+    <div className="relative min-h-svh overflow-hidden bg-background font-sans antialiased text-foreground pt-14">
       {/* Background Pattern */}
       <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_800px_at_100%_200px,var(--color-primary),transparent)] opacity-[0.03]"></div>
@@ -37,18 +57,22 @@ export default function Page() {
           <div className="relative group">
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-chart-2 to-primary opacity-70 blur transition duration-500 group-hover:opacity-100 group-hover:duration-200 animate-pulse"></div>
             <div className="relative w-28 h-28 rounded-full bg-card border-2 border-background overflow-hidden flex items-center justify-center">
-              <div className="bg-muted w-full h-full flex items-center justify-center">
-                <User className="w-12 h-12 text-muted-foreground" />
-              </div>
+              {profile?.photoURL ? (
+                <img src={profile.photoURL} alt={profile.displayName || "Profile"} className="w-full h-full object-cover" />
+              ) : (
+                <div className="bg-muted w-full h-full flex items-center justify-center">
+                  <User className="w-12 h-12 text-muted-foreground" />
+                </div>
+              )}
             </div>
           </div>
           
           <div className="space-y-1.5">
             <h1 className="text-3xl font-extrabold tracking-tight flex items-center justify-center gap-2">
-              @dev_kim
+              @{profile?.username || "user"}
             </h1>
             <p className="text-muted-foreground text-sm max-w-[320px] leading-relaxed">
-              Frontend Engineer passionate about building beautiful, functional user experiences. ✨
+              {profile?.bio}
             </p>
           </div>
 
@@ -67,7 +91,7 @@ export default function Page() {
 
         {/* Links Section */}
         <main className="w-full flex flex-col gap-3.5">
-          {isLoading ? (
+          {linksLoading ? (
             <div className="py-12 flex flex-col items-center justify-center">
               <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
               <p className="text-sm text-muted-foreground animate-pulse">링크를 불러오는 중...</p>

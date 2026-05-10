@@ -14,15 +14,21 @@ import {
 import { db } from "@/lib/firebase";
 import { Link } from "@/data/links";
 
-export function useLinks() {
+export function useLinks(uid: string | undefined) {
   const [links, setLinks] = useState<Link[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchLinks = useCallback(async (withLoading = true) => {
+    if (!uid) {
+      setLinks([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       if (withLoading) setIsLoading(true);
-      const linksCollectionRef = collection(db, "users", "anonymous", "links");
+      const linksCollectionRef = collection(db, "users", uid, "links");
       const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
       
       const querySnapshot = await getDocs(q);
@@ -42,7 +48,7 @@ export function useLinks() {
     } finally {
       if (withLoading) setIsLoading(false);
     }
-  }, []);
+  }, [uid]);
 
   useEffect(() => {
     const init = async () => {
@@ -52,8 +58,9 @@ export function useLinks() {
   }, [fetchLinks]);
 
   const addLink = async (title: string, url: string) => {
+    if (!uid) return;
     try {
-      const linksCollectionRef = collection(db, "users", "anonymous", "links");
+      const linksCollectionRef = collection(db, "users", uid, "links");
       const now = serverTimestamp();
       await addDoc(linksCollectionRef, {
         title,
@@ -70,8 +77,9 @@ export function useLinks() {
   };
 
   const deleteLink = async (id: string) => {
+    if (!uid) return;
     try {
-      const linkDocRef = doc(db, "users", "anonymous", "links", id);
+      const linkDocRef = doc(db, "users", uid, "links", id);
       await deleteDoc(linkDocRef);
       // 삭제 후 목록 갱신
       await fetchLinks();
@@ -82,9 +90,10 @@ export function useLinks() {
   };
 
   const updateLink = async (id: string, title: string, url: string) => {
+    if (!uid) return;
     try {
       const { updateDoc } = await import("firebase/firestore");
-      const linkDocRef = doc(db, "users", "anonymous", "links", id);
+      const linkDocRef = doc(db, "users", uid, "links", id);
       await updateDoc(linkDocRef, {
         title,
         url,
