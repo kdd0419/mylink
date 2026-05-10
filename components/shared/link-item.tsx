@@ -12,6 +12,7 @@ import {
   X,
   Loader2
 } from "lucide-react";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ interface LinkItemProps {
 export function LinkItem({ link, onUpdate, onDeleteRequest }: LinkItemProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   const {
     register,
@@ -174,18 +176,20 @@ export function LinkItem({ link, onUpdate, onDeleteRequest }: LinkItemProps) {
         <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
           <div className="flex items-center p-4 gap-4 pr-24">
             <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-background border border-border/50 shadow-sm group-hover:border-primary/30 transition-colors overflow-hidden">
-              <img
-                src={getFaviconUrl(link.url) || ""}
-                alt={link.title}
-                className="h-6 w-6 object-contain z-10"
-                onError={(e) => {
-                  e.currentTarget.style.display = 'none';
-                  e.currentTarget.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-              <div className="hidden absolute inset-0 flex items-center justify-center bg-muted/20">
-                <Code2 className="h-5 w-5 text-muted-foreground/60" />
-              </div>
+              {!imgError ? (
+                <Image
+                  src={getFaviconUrl(link.url) || ""}
+                  alt={link.title}
+                  width={24}
+                  height={24}
+                  className="object-contain z-10"
+                  onError={() => setImgError(true)}
+                />
+              ) : (
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/20">
+                  <Code2 className="h-5 w-5 text-muted-foreground/60" />
+                </div>
+              )}
             </div>
             
             <div className="flex-1 min-w-0 text-left">

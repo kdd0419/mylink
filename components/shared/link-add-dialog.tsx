@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +33,7 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
     handleSubmit,
     reset,
     formState: { errors },
-    watch,
+    control,
   } = useForm<LinkFormValues>({
     resolver: zodResolver(linkFormSchema),
     defaultValues: {
@@ -42,7 +42,11 @@ export function LinkAddDialog({ onAdd }: LinkAddDialogProps) {
     },
   });
 
-  const titleValue = watch("title") || "";
+  const titleValue = useWatch({
+    control,
+    name: "title",
+    defaultValue: "",
+  });
 
   const onSubmit = async (values: LinkFormValues) => {
     try {

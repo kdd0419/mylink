@@ -10,6 +10,7 @@ import { useLinks } from "@/hooks/useLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { Landing } from "@/components/shared/landing";
 import { Link } from "@/data/links";
+import Image from "next/image";
 
 export default function Page() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -58,7 +59,14 @@ export default function Page() {
             <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-chart-2 to-primary opacity-70 blur transition duration-500 group-hover:opacity-100 group-hover:duration-200 animate-pulse"></div>
             <div className="relative w-28 h-28 rounded-full bg-card border-2 border-background overflow-hidden flex items-center justify-center">
               {profile?.photoURL ? (
-                <img src={profile.photoURL} alt={profile.displayName || "Profile"} className="w-full h-full object-cover" />
+                <Image 
+                  src={profile.photoURL} 
+                  alt={profile.displayName || "Profile"} 
+                  fill 
+                  className="object-cover"
+                  sizes="112px"
+                  priority
+                />
               ) : (
                 <div className="bg-muted w-full h-full flex items-center justify-center">
                   <User className="w-12 h-12 text-muted-foreground" />
