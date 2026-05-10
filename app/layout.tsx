@@ -28,7 +28,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Header />
           {children}
-          <Toaster position="bottom-center" richColors />
+          <Toaster position="top-center" richColors closeButton />
         </ThemeProvider>
       </body>
     </html>

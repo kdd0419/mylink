@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, ChevronDown, Copy } from "lucide-react";
+import { LogOut, LogIn, Copy } from "lucide-react";
 import { toast } from "sonner";
 import {
   DropdownMenu,
@@ -36,30 +36,28 @@ export function Header() {
             <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
           ) : user ? (
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center gap-2 hover:bg-muted/50 px-2 py-1.5 rounded-full transition-all active:scale-95 outline-none group border-none bg-transparent cursor-pointer">
-                <Avatar className="w-7 h-7 border border-primary/20 pointer-events-none">
+              <DropdownMenuTrigger className="rounded-full transition-all active:scale-95 outline-none border-none bg-transparent cursor-pointer p-0.5 hover:ring-2 hover:ring-primary/20">
+                <Avatar className="w-8 h-8 border border-border shadow-sm">
                   <AvatarImage src={profile?.photoURL || ""} alt={profile?.displayName || "유저"} />
                   <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
                     {profile?.displayName?.slice(0, 2) || "ML"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-[12px] font-medium text-muted-foreground hidden sm:inline-block pointer-events-none">
-                  <span className="text-foreground font-semibold">{profile?.displayName || "유저"}</span>님
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/60 transition-transform duration-200 group-data-[state=open]:rotate-180 pointer-events-none" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-xl border-border">
+              <DropdownMenuContent align="end" className="w-56 rounded-2xl p-2 shadow-xl border-border">
                 <DropdownMenuGroup>
-                  <DropdownMenuLabel className="px-3 py-2 sm:hidden">
-                    <p className="text-[11px] font-bold text-foreground truncate">
+                  <DropdownMenuLabel className="px-3 py-3 border-b border-border/50 mb-1">
+                    <p className="text-[13px] font-bold text-foreground truncate">
                       {profile?.displayName || "유저"}
                     </p>
-                    <p className="text-[10px] text-muted-foreground truncate font-normal">
+                    <p className="text-[11px] text-muted-foreground truncate font-normal mt-0.5">
+                      {profile?.email}
+                    </p>
+                    <p className="text-[10px] text-primary/70 truncate font-medium mt-1">
                       @{profile?.username}
                     </p>
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
-                <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem
                   onClick={handleCopyLink}
                   className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer"
@@ -67,6 +65,7 @@ export function Header() {
                   <Copy className="w-4 h-4 text-muted-foreground" />
                   내 페이지 링크 복사
                 </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem
                   onClick={() => logout()}
                   className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer text-destructive focus:text-destructive"
