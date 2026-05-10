@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -48,14 +49,16 @@ export function Header() {
                 <ChevronDown className="w-3.5 h-3.5 text-muted-foreground/60 transition-transform duration-200 group-data-[state=open]:rotate-180 pointer-events-none" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-52 rounded-2xl p-2 shadow-xl border-border">
-                <DropdownMenuLabel className="px-3 py-2 sm:hidden">
-                  <p className="text-[11px] font-bold text-foreground truncate">
-                    {profile?.displayName || "유저"}
-                  </p>
-                  <p className="text-[10px] text-muted-foreground truncate font-normal">
-                    @{profile?.username}
-                  </p>
-                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="px-3 py-2 sm:hidden">
+                    <p className="text-[11px] font-bold text-foreground truncate">
+                      {profile?.displayName || "유저"}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground truncate font-normal">
+                      @{profile?.username}
+                    </p>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator className="sm:hidden" />
                 <DropdownMenuItem
                   onClick={handleCopyLink}
