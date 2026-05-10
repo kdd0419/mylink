@@ -22,7 +22,9 @@ export function Header() {
     if (profile?.username) {
       const url = `${window.location.origin}/${profile.username}`;
       navigator.clipboard.writeText(url);
-      toast.success("내 페이지 링크가 복사되었습니다! ✨");
+      toast("링크를 복사했어요. 🔗", {
+        description: "이제 필요한 곳에 공유해 보세요.",
+      });
     }
   };
 

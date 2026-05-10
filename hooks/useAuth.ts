@@ -42,7 +42,7 @@ export function useAuth() {
           const username = firebaseUser.email?.split("@")[0] || "user";
           const newProfile: Partial<UserProfile> = {
             username,
-            bio: "반갑습니다! 제 마이링크에 오신 것을 환영합니다. ✨",
+            bio: "반갑습니다! 제 마이링크에 오신 것을 환영합니다.",
           };
 
           await setDoc(userDocRef, {
