@@ -61,11 +61,11 @@ export function LinkDeleteDialog({
             ⚠️ 이 작업은 되돌릴 수 없습니다.
           </p>
         </div>
-        <DialogFooter className="flex gap-2 sm:gap-0">
+        <DialogFooter className="flex-row gap-2.5 pt-2 sm:gap-2">
           <Button
             variant="ghost"
             onClick={handleClose}
-            className="flex-1 h-11 rounded-xl font-medium"
+            className="flex-1 h-12 rounded-2xl font-medium"
             disabled={isDeleting}
           >
             취소
@@ -73,7 +73,7 @@ export function LinkDeleteDialog({
           <Button
             variant="destructive"
             onClick={handleConfirm}
-            className="flex-1 h-11 rounded-xl font-semibold shadow-sm hover:shadow-md transition-all"
+            className="flex-1 h-12 rounded-2xl font-semibold shadow-sm hover:shadow-md transition-all"
             disabled={isDeleting}
           >
             {isDeleting ? (
