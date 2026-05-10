@@ -33,9 +33,39 @@ export function Landing() {
         지금 시작하기 (Google)
       </Button>
 
-      <div className="mt-16 w-full max-w-sm rounded-3xl border border-border/50 bg-card/50 backdrop-blur-sm p-4 aspect-square flex items-center justify-center relative overflow-hidden group">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent"></div>
-        <p className="text-[11px] text-muted-foreground/40 font-mono uppercase tracking-[0.2em]">Service Preview Mockup</p>
+      <div className="mt-16 w-full max-w-[340px] rounded-[2.5rem] border-8 border-card bg-card shadow-2xl relative overflow-hidden aspect-[9/16] group transition-transform duration-500 hover:scale-[1.02]">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:10px_10px]"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5"></div>
+        
+        {/* Mockup Content */}
+        <div className="relative h-full flex flex-col items-center px-6 pt-12">
+          {/* Profile Circle */}
+          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-primary/20 to-primary/40 mb-4 animate-pulse"></div>
+          
+          {/* Text Skeletons */}
+          <div className="w-24 h-3 bg-foreground/10 rounded-full mb-2"></div>
+          <div className="w-32 h-2 bg-foreground/5 rounded-full mb-8"></div>
+          
+          {/* Link Skeletons */}
+          <div className="w-full space-y-3">
+            {[1, 2, 3, 4].map((i) => (
+              <div 
+                key={i} 
+                className="w-full h-12 rounded-2xl bg-background/80 border border-border/50 flex items-center px-4 gap-3 animate-in fade-in slide-in-from-bottom-2 duration-700"
+                style={{ animationDelay: `${i * 150}ms` }}
+              >
+                <div className="w-6 h-6 rounded-lg bg-primary/10"></div>
+                <div className="flex-1 h-2 bg-foreground/5 rounded-full"></div>
+              </div>
+            ))}
+          </div>
+          
+          {/* Brand Tag */}
+          <div className="mt-auto mb-6 flex flex-col items-center gap-1.5 opacity-30">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary animate-ping"></div>
+            <p className="text-[8px] font-bold uppercase tracking-[0.2em]">Made with My Link</p>
+          </div>
+        </div>
       </div>
     </div>
   );
