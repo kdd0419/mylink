@@ -41,9 +41,8 @@ export function Landing() {
       </Button>
 
       {/* Enhanced Mockup */}
-      <div className="mt-16 w-full max-w-[340px] rounded-[3rem] border-[10px] border-card bg-card shadow-2xl relative overflow-hidden aspect-[9/16] group transition-all duration-700 hover:scale-[1.02] hover:-rotate-1">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:10px_10px]"></div>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-primary/5"></div>
+      <div className="mt-16 w-full max-w-[340px] rounded-[3rem] border-[10px] border-card bg-background shadow-2xl relative overflow-hidden aspect-[9/16] group transition-all duration-700 hover:scale-[1.02] hover:-rotate-1 ring-1 ring-border/50">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5"></div>
         
         {/* Mockup Content */}
         <div className="relative h-full flex flex-col items-center px-6 pt-12">
