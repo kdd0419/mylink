@@ -132,10 +132,10 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
     if (isEditing) {
       return (
-        <div className="w-full flex flex-col items-center gap-2 animate-in fade-in duration-200">
-          <div className="relative w-full max-w-[320px]">
+        <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
+          <div className="relative w-full max-w-[320px] px-2 py-1">
             {field === "username" && (
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">@</span>
+              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">@</span>
             )}
             {field === "bio" ? (
               <textarea
@@ -146,13 +146,13 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
                 className={cn(
-                  "flex min-h-[80px] w-full rounded-xl border border-primary/40 bg-background/80 px-3 py-2 text-sm text-center shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 resize-none",
-                  error && "border-destructive ring-destructive/20"
+                  "flex min-h-[80px] w-full bg-transparent p-0 text-sm text-center focus-visible:outline-none resize-none border-none shadow-none leading-relaxed italic",
+                  error && "text-destructive"
                 )}
                 placeholder="소개글을 입력하세요"
               />
             ) : (
-              <Input
+            <Input
                 ref={inputRef as any}
                 value={values[field]}
                 onChange={(e) => setValues({ ...values, [field]: e.target.value })}
@@ -160,21 +160,22 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
                 className={cn(
-                  "h-10 rounded-xl bg-background/80 text-center font-semibold",
-                  field === "username" && "pl-8 text-primary",
-                  field === "displayName" && "text-xl",
-                  error && "border-destructive ring-destructive/20"
+                  "bg-transparent text-center border-none shadow-none focus-visible:ring-0 p-0 h-auto",
+                  field === "username" && "!text-primary font-bold !text-sm leading-tight",
+                  field === "displayName" && "!text-3xl font-extrabold tracking-tight leading-tight",
+                  error && "text-destructive"
                 )}
                 placeholder={field === "username" ? "사용자 이름" : "표시 이름"}
               />
+
             )}
             {isSaving && (
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
+              <div className="absolute right-4 top-1/2 -translate-y-1/2">
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
               </div>
             )}
           </div>
-          {error && <p className="text-[11px] text-destructive font-medium">{error}</p>}
+          {error && <p className="text-[11px] text-destructive font-medium mt-1">{error}</p>}
         </div>
       );
     }
@@ -224,7 +225,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
       <div className="space-y-1 flex flex-col items-center w-full max-w-[320px]">
         {renderEditableField(
           "displayName",
-          <h1 className="text-3xl font-extrabold tracking-tight">
+          <h1 className="text-3xl font-extrabold tracking-tight leading-tight">
             {profile?.displayName || profile?.username || "user"}
           </h1>,
           "w-fit"
@@ -232,7 +233,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
         {renderEditableField(
           "username",
-          <p className="text-primary font-bold text-sm">
+          <p className="text-primary font-bold text-sm leading-tight">
             @{profile?.username || "user"}
           </p>,
           "w-fit"

@@ -2,8 +2,9 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, Copy } from "lucide-react";
+import { LogOut, LogIn, Copy, User as UserIcon, Home } from "lucide-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +32,9 @@ export function Header() {
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
       <div className="mx-auto max-w-xl w-full flex items-center justify-between h-14 px-6">
-        <div className="text-sm font-bold tracking-tighter">My Link</div>
+        <Link href="/" className="text-sm font-bold tracking-tighter hover:opacity-70 transition-opacity">
+          My Link
+        </Link>
         
         <div className="flex items-center gap-3">
           {loading ? (
@@ -60,12 +63,26 @@ export function Header() {
                     </p>
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
+                <Link href="/">
+                  <DropdownMenuItem className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer">
+                    <Home className="w-4 h-4 text-muted-foreground" />
+                    대시보드
+                  </DropdownMenuItem>
+                </Link>
+                {profile?.username && (
+                  <Link href={`/${profile.username}`}>
+                    <DropdownMenuItem className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer">
+                      <UserIcon className="w-4 h-4 text-muted-foreground" />
+                      내 페이지 보기
+                    </DropdownMenuItem>
+                  </Link>
+                )}
                 <DropdownMenuItem
                   onClick={handleCopyLink}
                   className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer"
                 >
                   <Copy className="w-4 h-4 text-muted-foreground" />
-                  내 페이지 링크 복사
+                  링크 복사
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
