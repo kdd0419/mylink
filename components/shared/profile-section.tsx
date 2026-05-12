@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { User, Pencil, Check, X, Loader2 } from "lucide-react";
+import { User, Pencil, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { UserProfile } from "@/data/user";
@@ -25,7 +25,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -75,7 +75,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
   const handleSave = async () => {
     if (!editingField || !profile) return;
-    
+
     const currentValue = values[editingField as keyof typeof values];
     const originalValue = (profile[editingField as keyof UserProfile] as string) || "";
 
@@ -132,10 +132,16 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
     if (isEditing) {
       return (
-        <div className="w-full flex flex-col items-center animate-in fade-in duration-200">
-          <div className="relative w-full max-w-[320px] px-2 py-1">
+        <div className={cn(
+          "w-full flex flex-col items-center animate-in fade-in duration-200",
+          field === "bio" && "mt-1"
+        )}>
+          <div className={cn(
+            "relative w-full max-w-[320px] flex items-center justify-center",
+            field === "bio" ? "px-0 py-0" : "px-2 py-1"
+          )}>
             {field === "username" && (
-              <span className="absolute left-5 top-1/2 -translate-y-1/2 text-muted-foreground text-sm font-medium">@</span>
+              <span className="text-primary font-bold text-sm leading-tight">@</span>
             )}
             {field === "bio" ? (
               <textarea
@@ -145,32 +151,43 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
                 disabled={isSaving}
+                rows={1}
                 className={cn(
-                  "flex min-h-[80px] w-full bg-transparent p-0 text-sm text-center focus-visible:outline-none resize-none border-none shadow-none leading-relaxed italic",
+                  "flex w-full bg-transparent p-0 text-sm text-center focus-visible:outline-none resize-none border-none shadow-none leading-relaxed italic overflow-hidden",
                   error && "text-destructive"
                 )}
                 placeholder="소개글을 입력하세요"
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = 'auto';
+                  target.style.height = target.scrollHeight + 'px';
+                }}
               />
             ) : (
-            <Input
-                ref={inputRef as any}
-                value={values[field]}
-                onChange={(e) => setValues({ ...values, [field]: e.target.value })}
-                onBlur={handleSave}
-                onKeyDown={handleKeyDown}
-                disabled={isSaving}
-                className={cn(
-                  "bg-transparent text-center border-none shadow-none focus-visible:ring-0 p-0 h-auto",
-                  field === "username" && "!text-primary font-bold !text-sm leading-tight",
-                  field === "displayName" && "!text-3xl font-extrabold tracking-tight leading-tight",
-                  error && "text-destructive"
-                )}
-                placeholder={field === "username" ? "사용자 이름" : "표시 이름"}
-              />
-
+              <div className="flex items-center">
+                <Input
+                  ref={inputRef as any}
+                  value={values[field]}
+                  onChange={(e) => setValues({ ...values, [field]: e.target.value })}
+                  onBlur={handleSave}
+                  onKeyDown={handleKeyDown}
+                  disabled={isSaving}
+                  style={{ width: field === "username" ? `${values.username.length + 0.5}ch` : 'auto' }}
+                  className={cn(
+                    "bg-transparent text-center border-none shadow-none focus-visible:ring-0 p-0 h-auto",
+                    field === "username" && "!text-primary font-bold !text-sm leading-tight min-w-[1ch] ml-0",
+                    field === "displayName" && "!text-3xl font-extrabold tracking-tight leading-tight w-full",
+                    error && "text-destructive"
+                  )}
+                  placeholder={field === "username" ? "사용자 이름" : "표시 이름"}
+                />
+              </div>
             )}
             {isSaving && (
-              <div className="absolute right-4 top-1/2 -translate-y-1/2">
+              <div className={cn(
+                "absolute top-1/2 -translate-y-1/2",
+                field === "bio" ? "-right-6" : "right-4"
+              )}>
                 <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground" />
               </div>
             )}
@@ -181,7 +198,7 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
     }
 
     return (
-      <div 
+      <div
         onClick={() => handleEdit(field)}
         className={cn(
           "group relative cursor-pointer rounded-lg px-2 py-1 transition-all hover:bg-muted/50",
@@ -233,8 +250,9 @@ export function ProfileSection({ profile, onUpdate }: ProfileSectionProps) {
 
         {renderEditableField(
           "username",
-          <p className="text-primary font-bold text-sm leading-tight">
-            @{profile?.username || "user"}
+          <p className="text-primary font-bold text-sm leading-tight flex items-center">
+            <span className="mr-0.5">@</span>
+            {profile?.username || "user"}
           </p>,
           "w-fit"
         )}
