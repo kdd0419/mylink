@@ -22,6 +22,25 @@ export const linkFormSchema = z.object({
 
 export type LinkFormValues = z.infer<typeof linkFormSchema>;
 
+export const profileFormSchema = z.object({
+  username: z
+    .string()
+    .min(2, { message: "사용자 이름은 2자 이상이어야 합니다." })
+    .max(20, { message: "사용자 이름은 20자 이내여야 합니다." })
+    .regex(/^[a-zA-Z0-9_.]+$/, {
+      message: "사용자 이름은 영문, 숫자, 밑줄(_), 마침표(.)만 사용할 수 있습니다.",
+    }),
+  displayName: z
+    .string()
+    .min(1, { message: "표시 이름을 입력해주세요." })
+    .max(30, { message: "표시 이름은 30자 이내여야 합니다." }),
+  bio: z
+    .string()
+    .max(160, { message: "소개글은 160자 이내여야 합니다." }),
+});
+
+export type ProfileFormValues = z.infer<typeof profileFormSchema>;
+
 export const formatUrl = (url: string) => {
   let formattedUrl = url.trim();
   if (!/^https?:\/\//i.test(formattedUrl)) {

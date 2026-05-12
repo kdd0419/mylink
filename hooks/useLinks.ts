@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { 
   collection, 
   getDocs, 
@@ -9,111 +8,94 @@ import {
   addDoc, 
   deleteDoc, 
   doc, 
-  serverTimestamp 
+  serverTimestamp,
+  updateDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Link } from "@/data/links";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export function useLinks(uid: string | undefined) {
-  const [links, setLinks] = useState<Link[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const queryClient = useQueryClient();
 
-  const fetchLinks = useCallback(async (withLoading = true) => {
-    if (!uid) {
-      setLinks([]);
-      setIsLoading(false);
-      return;
-    }
+  // 링크 목록 조회 쿼리
+  const { data: links = [], isLoading, error } = useQuery({
+    queryKey: ["links", uid],
+    queryFn: async (): Promise<Link[]> => {
+      if (!uid) return [];
 
-    try {
-      if (withLoading) setIsLoading(true);
       const linksCollectionRef = collection(db, "users", uid, "links");
       const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
       
       const querySnapshot = await getDocs(q);
-      const fetchedLinks = querySnapshot.docs.map((doc) => ({
+      return querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-        // Firestore Timestamp를 JS Date로 변환
         createdAt: doc.data().createdAt?.toDate() || new Date(),
         updatedAt: doc.data().updatedAt?.toDate(),
       })) as Link[];
+    },
+    enabled: !!uid,
+  });
 
-      setLinks(fetchedLinks);
-      setError(null);
-    } catch (err) {
-      console.error("Firestore fetching error:", err);
-      setError(err as Error);
-    } finally {
-      if (withLoading) setIsLoading(false);
-    }
-  }, [uid]);
-
-  useEffect(() => {
-    const init = async () => {
-      await fetchLinks();
-    };
-    init();
-  }, [fetchLinks]);
-
-  const addLink = async (title: string, url: string) => {
-    if (!uid) return;
-    try {
+  // 링크 추가 뮤테이션
+  const addLinkMutation = useMutation({
+    mutationFn: async ({ title, url }: { title: string; url: string }) => {
+      if (!uid) throw new Error("로그인이 필요합니다.");
       const linksCollectionRef = collection(db, "users", uid, "links");
       const now = serverTimestamp();
-      await addDoc(linksCollectionRef, {
+      const docRef = await addDoc(linksCollectionRef, {
         title,
         url,
         createdAt: now,
         updatedAt: now,
       });
-      // 추가 후 목록 갱신
-      await fetchLinks();
-    } catch (err) {
-      console.error("Error adding link:", err);
-      throw err;
-    }
-  };
+      return { id: docRef.id, title, url };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links", uid] });
+    },
+  });
 
-  const deleteLink = async (id: string) => {
-    if (!uid) return;
-    try {
+  // 링크 삭제 뮤테이션
+  const deleteLinkMutation = useMutation({
+    mutationFn: async (id: string) => {
+      if (!uid) throw new Error("로그인이 필요합니다.");
       const linkDocRef = doc(db, "users", uid, "links", id);
       await deleteDoc(linkDocRef);
-      // 삭제 후 목록 갱신
-      await fetchLinks();
-    } catch (err) {
-      console.error("Error deleting link:", err);
-      throw err;
-    }
-  };
+      return id;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links", uid] });
+    },
+  });
 
-  const updateLink = async (id: string, title: string, url: string) => {
-    if (!uid) return;
-    try {
-      const { updateDoc } = await import("firebase/firestore");
+  // 링크 수정 뮤테이션
+  const updateLinkMutation = useMutation({
+    mutationFn: async ({ id, title, url }: { id: string; title: string; url: string }) => {
+      if (!uid) throw new Error("로그인이 필요합니다.");
       const linkDocRef = doc(db, "users", uid, "links", id);
       await updateDoc(linkDocRef, {
         title,
         url,
         updatedAt: serverTimestamp(),
       });
-      // 수정 후 목록 갱신
-      await fetchLinks();
-    } catch (err) {
-      console.error("Error updating link:", err);
-      throw err;
-    }
-  };
+      return { id, title, url };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["links", uid] });
+    },
+  });
 
   return {
     links,
     isLoading,
-    error,
-    addLink,
-    deleteLink,
-    updateLink,
-    refresh: fetchLinks,
+    error: error as Error | null,
+    addLink: async (title: string, url: string) => addLinkMutation.mutateAsync({ title, url }),
+    deleteLink: async (id: string) => deleteLinkMutation.mutateAsync(id),
+    updateLink: async (id: string, title: string, url: string) => updateLinkMutation.mutateAsync({ id, title, url }),
+    isAdding: addLinkMutation.isPending,
+    isDeleting: deleteLinkMutation.isPending,
+    isUpdating: updateLinkMutation.isPending,
   };
 }

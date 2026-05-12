@@ -6,14 +6,14 @@ import { Share2, User } from "lucide-react";
 import { LinkAddDialog } from "@/components/shared/link-add-dialog";
 import { LinkItem } from "@/components/shared/link-item";
 import { LinkDeleteDialog } from "@/components/shared/link-delete-dialog";
+import { ProfileSection } from "@/components/shared/profile-section";
 import { useLinks } from "@/hooks/useLinks";
 import { useAuth } from "@/hooks/useAuth";
 import { Landing } from "@/components/shared/landing";
 import { Link } from "@/data/links";
-import Image from "next/image";
 
 export default function Page() {
-  const { user, profile, loading: authLoading } = useAuth();
+  const { user, profile, loading: authLoading, updateProfile } = useAuth();
   const { links, isLoading: linksLoading, addLink, deleteLink, updateLink } = useLinks(user?.uid);
   const [linkToDelete, setLinkToDelete] = useState<Link | null>(null);
 
@@ -54,43 +54,7 @@ export default function Page() {
 
       <div className="mx-auto flex w-full max-w-xl flex-col items-center px-6 pt-16 pb-24">
         {/* Profile Section */}
-        <header className="flex flex-col items-center text-center gap-4 mb-10 w-full">
-          <div className="relative group">
-            <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-primary via-chart-2 to-primary opacity-70 blur transition duration-500 group-hover:opacity-100 group-hover:duration-200 animate-pulse"></div>
-            <div className="relative w-28 h-28 rounded-full bg-card border-2 border-background overflow-hidden flex items-center justify-center">
-              {profile?.photoURL ? (
-                <Image 
-                  src={profile.photoURL} 
-                  alt={profile.displayName || "Profile"} 
-                  fill 
-                  className="object-cover"
-                  sizes="112px"
-                  priority
-                />
-              ) : (
-                <div className="bg-muted w-full h-full flex items-center justify-center">
-                  <User className="w-12 h-12 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-          </div>
-          
-          <div className="space-y-1.5">
-            <h1 className="text-3xl font-extrabold tracking-tight flex items-center justify-center gap-2">
-              @{profile?.username || "user"}
-            </h1>
-            <p className="text-muted-foreground text-sm max-w-[320px] leading-relaxed">
-              {profile?.bio}
-            </p>
-          </div>
-
-          <div className="flex gap-2 mt-2">
-            <Button variant="outline" size="sm" className="rounded-full h-8 gap-1.5 text-xs bg-background/50 backdrop-blur-sm">
-              <Share2 className="w-3.5 h-3.5" />
-              공유하기
-            </Button>
-          </div>
-        </header>
+        <ProfileSection profile={profile ?? null} onUpdate={updateProfile} />
 
         {/* Action Section */}
         <div className="w-full mb-8">
