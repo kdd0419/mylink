@@ -13,6 +13,7 @@ export interface Link {
   url: string;
   createdAt: Date;
   updatedAt?: Date;
+  clickCount?: number;
 }
 
 export const DUMMY_LINKS: Link[] = [

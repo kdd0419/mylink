@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Share2, User } from "lucide-react";
 import { LinkAddDialog } from "@/components/shared/link-add-dialog";
 import { LinkItem } from "@/components/shared/link-item";
 import { LinkDeleteDialog } from "@/components/shared/link-delete-dialog";

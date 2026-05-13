@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { 
-  ExternalLink, 
-  Code2, 
-  Trash2, 
-  Pencil, 
-  Check, 
+import {
+  ExternalLink,
+  Code2,
+  Trash2,
+  Pencil,
+  Check,
   X,
-  Loader2
+  Loader2,
+  MousePointerClick,
 } from "lucide-react";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -196,9 +197,16 @@ export function LinkItem({ link, onUpdate, onDeleteRequest }: LinkItemProps) {
               <h2 className="text-sm font-semibold tracking-tight truncate group-hover:text-primary transition-colors">
                 {link.title}
               </h2>
-              <p className="text-[11px] text-muted-foreground truncate opacity-70">
-                {new URL(link.url).hostname}
-              </p>
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground opacity-70">
+                <span className="truncate">{new URL(link.url).hostname}</span>
+                {!!link.clickCount && (
+                  <>
+                    <span>·</span>
+                    <MousePointerClick className="w-3 h-3 shrink-0" />
+                    <span className="tabular-nums shrink-0">{link.clickCount.toLocaleString()}</span>
+                  </>
+                )}
+              </div>
             </div>
 
             <ExternalLink className="w-4 h-4 text-muted-foreground/30 group-hover:text-primary/70 transition-all mr-2" />

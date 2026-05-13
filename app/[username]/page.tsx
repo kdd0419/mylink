@@ -5,6 +5,7 @@ import { collection, query, where, getDocs, doc, getDoc, orderBy } from "firebas
 import { db } from "@/lib/firebase";
 import { UserProfile } from "@/data/user";
 import { Link as LinkData } from "@/data/links";
+import { incrementClickCount } from "@/hooks/useLinks";
 import { useParams, notFound } from "next/navigation";
 import Image from "next/image";
 import { User, Code2, ExternalLink } from "lucide-react";
@@ -136,6 +137,7 @@ export default function UserPublicPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative block w-full outline-none"
+                  onClick={() => incrementClickCount(userProfile.uid, link.id)}
                 >
                   <Card className="relative overflow-hidden border-border/50 bg-card/40 backdrop-blur-sm transition-all duration-300 hover:border-primary/50 hover:bg-accent/40 hover:translate-y-[-2px] hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]">
                     <div className="flex items-center p-4 gap-4">

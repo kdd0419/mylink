@@ -1,19 +1,29 @@
 "use client";
 
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  orderBy, 
-  addDoc, 
-  deleteDoc, 
-  doc, 
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  addDoc,
+  deleteDoc,
+  doc,
   serverTimestamp,
-  updateDoc
+  updateDoc,
+  increment,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Link } from "@/data/links";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+export async function incrementClickCount(uid: string, linkId: string): Promise<void> {
+  try {
+    const linkDocRef = doc(db, "users", uid, "links", linkId);
+    await updateDoc(linkDocRef, { clickCount: increment(1) });
+  } catch (error) {
+    console.error("Failed to track link click:", error);
+  }
+}
 
 export function useLinks(uid: string | undefined) {
   const queryClient = useQueryClient();
@@ -26,7 +36,7 @@ export function useLinks(uid: string | undefined) {
 
       const linksCollectionRef = collection(db, "users", uid, "links");
       const q = query(linksCollectionRef, orderBy("createdAt", "desc"));
-      
+
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map((doc) => ({
         id: doc.id,
