@@ -2,7 +2,7 @@
 
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
-import { LogOut, LogIn, Copy, User as UserIcon, Home } from "lucide-react";
+import { LogOut, LogIn, Copy, User as UserIcon, Home, BarChart2 } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import {
@@ -77,6 +77,12 @@ export function Header() {
                     </DropdownMenuItem>
                   </Link>
                 )}
+                <Link href="/stats">
+                  <DropdownMenuItem className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer">
+                    <BarChart2 className="w-4 h-4 text-muted-foreground" />
+                    통계
+                  </DropdownMenuItem>
+                </Link>
                 <DropdownMenuItem
                   onClick={handleCopyLink}
                   className="rounded-xl px-3 py-2.5 text-[12px] font-medium gap-3 focus:bg-muted cursor-pointer"
