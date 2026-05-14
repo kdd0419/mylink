@@ -14,14 +14,24 @@ export const metadata: Metadata = {
     template: '%s | My Link',
   },
   description: '모든 링크를 하나의 페이지로. GitHub, 블로그, 포트폴리오를 한 곳에 모으세요.',
+  keywords: ['My Link', '링크 모음', '링크트리', 'linktree', '소셜 링크', '포트폴리오'],
+  authors: [{ name: 'My Link' }],
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
   openGraph: {
     type: 'website',
     siteName: 'My Link',
     title: 'My Link',
-    description: '모든 링크를 하나의 페이지로.',
+    description: '모든 링크를 하나의 페이지로. GitHub, 블로그, 포트폴리오를 한 곳에 모으세요.',
+    locale: 'ko_KR',
   },
   twitter: {
     card: 'summary_large_image',
+    title: 'My Link',
+    description: '모든 링크를 하나의 페이지로.',
   },
 };
 
